@@ -1,5 +1,5 @@
-#ifndef RBTREE_H_
-#define RBTREE_H_
+#ifndef MULTIMAP_H_
+#define MULTIMAP_H_
 
 #include <stdbool.h>
 #include <stddef.h>
