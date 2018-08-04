@@ -245,3 +245,14 @@ fail_2:
 fail:
     return false;
 }
+
+bool multimap_contains(struct multimap *map, int key)
+{
+    assert(map);
+
+    struct multimap_rbtree_node *node = rbtree_get(map->root, key);
+    if (node != NULL) {
+        return true;
+    }
+    return false;
+}
