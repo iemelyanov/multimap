@@ -17,14 +17,16 @@
 
 #define set_black(node) ((node)->is_red = false)
 
-#define RBTREE_NODE_VEC_CAP (1)
+#define MULTIMAP_VEC_CAP (1)
 
 static inline void
-rbtree_single_rotate(struct rbtree_node **root, struct rbtree_node *curr, int direct)
+rbtree_single_rotate(struct multimap_rbtree_node **root,
+                     struct multimap_rbtree_node *curr,
+                     int direct)
 {
     assert(curr);
 
-    struct rbtree_node *rnode = curr->childs[direct];
+    struct multimap_rbtree_node *rnode = curr->childs[direct];
 
     curr->childs[direct] = rnode->childs[!direct];
 
@@ -51,12 +53,13 @@ rbtree_single_rotate(struct rbtree_node **root, struct rbtree_node *curr, int di
 }
 
 static inline void
-rbtree_fixup(struct rbtree_node **root, struct rbtree_node *node)
+rbtree_fixup(struct multimap_rbtree_node **root,
+             struct multimap_rbtree_node *node)
 {
     assert(node);
     
-    struct rbtree_node *t = node;
-    struct rbtree_node *u = NULL;
+    struct multimap_rbtree_node *t = node;
+    struct multimap_rbtree_node *u = NULL;
     int direct            = 0;
     
     while (t != *root && is_red(parent(t))) {
@@ -82,10 +85,10 @@ rbtree_fixup(struct rbtree_node **root, struct rbtree_node *node)
 }
 
 static void
-rbtree_insert(struct multimap *map, struct rbtree_node *node)
+rbtree_insert(struct multimap *map, struct multimap_rbtree_node *node)
 {
-    struct rbtree_node **_root = &map->root;
-    struct rbtree_node *parent = NULL;
+    struct multimap_rbtree_node **_root = &map->root;
+    struct multimap_rbtree_node *parent = NULL;
     int direct                 = 0;
 
     while (*_root != NULL) {
@@ -104,10 +107,10 @@ rbtree_insert(struct multimap *map, struct rbtree_node *node)
     rbtree_fixup(&map->root, node);
 }
 
-static struct rbtree_node *
-rbtree_get(struct rbtree_node *root, int key)
+static struct multimap_rbtree_node *
+rbtree_get(struct multimap_rbtree_node *root, int key)
 {
-    struct rbtree_node *_root = root;
+    struct multimap_rbtree_node *_root = root;
     int direct                = 0;
     
     while (_root != NULL) {
@@ -121,49 +124,56 @@ rbtree_get(struct rbtree_node *root, int key)
 }
 
 static inline bool
-rbtree_node_vec_init(struct rbtree_node_vec *vec)
+vec_init(struct multimap_vec *vec)
 {
-    vec->vec = (int*)malloc(sizeof(int) * RBTREE_NODE_VEC_CAP);
-    if (vec->vec == NULL) {
+    vec->items = (struct multimap_vec_item*)malloc(
+        sizeof(struct multimap_vec_item) * MULTIMAP_VEC_CAP);
+    if (vec->items == NULL) {
         return false;
     }
     
-    vec->cap  = RBTREE_NODE_VEC_CAP;
+    vec->cap  = MULTIMAP_VEC_CAP;
     vec->size = 0;
 
     return true;
 }
 
-// TODO: use me!
+// Todo: use me!
 static inline void
-rbtree_node_vec_free(struct rbtree_node_vec *vec)
+vec_free(struct multimap_vec *vec)
 {
     assert(vec);
-    assert(vec->vec);
+    assert(vec->items);
 
-    free(vec->vec);
+    free(vec->items);
     free(vec);
 }
 
 static long long
-rbtree_node_vec_add(struct rbtree_node_vec *vec, int val)
+vec_add(struct multimap_vec *vec, int val, struct multimap_item *item)
 {
     assert(vec);
 
     if (vec->size >= vec->cap) {
         size_t new_cap = vec->cap * 2;
-        int *new_vec = realloc(vec->vec, sizeof(int) * new_cap);
-        if (new_vec == NULL) {
+        struct multimap_vec_item *new_items = realloc(
+            vec->items, sizeof(struct multimap_vec_item) * new_cap);
+        if (new_items == NULL) {
             return -1;
         }
-        vec->vec = new_vec;
-        vec->cap = new_cap;
+        vec->items = new_items;
+        vec->cap   = new_cap;
     }
 
     size_t idx = vec->size;
+
+    struct multimap_vec_item vec_item = {
+        .multimap_item = item,
+        .value         = val
+    };
     
-    vec->vec[idx] = val;
-    vec->size +=1;
+    vec->items[idx]  = vec_item;
+    vec->size       +=1;
 
     return idx;
 }
@@ -190,13 +200,14 @@ multimap_add(struct multimap *map, int key, int val)
         return false;
     }
 
-    struct rbtree_node *node = rbtree_get(map->root, key);
+    struct multimap_rbtree_node *node = rbtree_get(map->root, key);
     if (node == NULL) {
-        node = (struct rbtree_node*)malloc(sizeof(struct rbtree_node));
+        node = (struct multimap_rbtree_node*)malloc(
+            sizeof(struct multimap_rbtree_node));
         if (node == NULL) {
             goto fail_2;
         }
-        if (!rbtree_node_vec_init(&node->vals)) {
+        if (!vec_init(&node->values)) {
             goto fail_1;
         }
 
@@ -204,9 +215,9 @@ multimap_add(struct multimap *map, int key, int val)
         
         rbtree_insert(map, node);
     }
-
+    
     // TODO: this is not clear and should be refactored
-    long long idx = rbtree_node_vec_add(&node->vals, val);
+    long long idx = vec_add(&node->values, val, item);
     if (idx == -1) {
         goto fail;
     }

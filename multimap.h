@@ -4,31 +4,38 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-struct rbtree_node_vec {
-    int    *vec;
-    size_t  cap;
-    size_t  size;
+struct multimap_item;
+
+struct multimap_vec_item {
+    struct multimap_item *multimap_item;
+    int                   value;
 };
 
-struct rbtree_node {
-    struct rbtree_node     *childs[2];
-    struct rbtree_node     *parent;
-    struct rbtree_node_vec  vals;
-    int                     key;
-    bool                    is_red;
+struct multimap_vec {
+    struct multimap_vec_item *items;
+    size_t                    cap;
+    size_t                    size;
+};
+
+struct multimap_rbtree_node {
+    struct multimap_rbtree_node *childs[2];
+    struct multimap_rbtree_node *parent;
+    struct multimap_vec          values;
+    int                          key;
+    bool                         is_red;
 };
 
 struct multimap_item {
-    struct multimap_item *next;
-    struct rbtree_node   *node;
-    size_t                val_idx;
+    struct multimap_item        *next;
+    struct multimap_rbtree_node *node;
+    size_t                       val_idx;
 };
 
 struct multimap {
-    struct multimap_item *head;
-    struct multimap_item *tail;
-    struct rbtree_node   *root;
-    size_t                size;
+    struct multimap_item        *head;
+    struct multimap_item        *tail;
+    struct multimap_rbtree_node *root;
+    size_t                       size;
 };
 
 void multimap_init(struct multimap *map);

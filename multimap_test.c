@@ -7,7 +7,7 @@
 #define COUNT 10
 
 static void
-print_tree(struct rbtree_node *root, int space)
+print_tree(struct multimap_rbtree_node *root, int space)
 {
     if (root == NULL) {
         return;
