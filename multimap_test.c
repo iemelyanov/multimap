@@ -38,7 +38,11 @@ benchmark(int n)
     multimap_init(&map);
 
     for (int i = 0; i < n; i++) {
+        for (int j = 0; j < 100; j++) {
+            multimap_add(&map, i, j);
+        }
     }
+    print_tree(map.root, 0);
 }
 
 void
@@ -71,6 +75,7 @@ test()
 int
 main(int argc, char **argv)
 {
+
     /*
     int n = 0;
     if (argc == 2) {
@@ -83,6 +88,7 @@ main(int argc, char **argv)
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("%f\n", time_spent);
     */
+
     test();
     return 0;
 }

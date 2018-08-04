@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "multimap.h"
 
 #define parent(node) ((node)->parent)
@@ -60,7 +61,7 @@ rbtree_fixup(struct multimap_rbtree_node **root,
     
     struct multimap_rbtree_node *t = node;
     struct multimap_rbtree_node *u = NULL;
-    int direct            = 0;
+    int direct                     = 0;
     
     while (t != *root && is_red(parent(t))) {
         direct = (parent(t) == uncle(t, 0));
@@ -89,7 +90,7 @@ rbtree_insert(struct multimap *map, struct multimap_rbtree_node *node)
 {
     struct multimap_rbtree_node **_root = &map->root;
     struct multimap_rbtree_node *parent = NULL;
-    int direct                 = 0;
+    int direct                          = 0;
 
     while (*_root != NULL) {
         if (node->key == (*_root)->key) {
@@ -111,7 +112,7 @@ static struct multimap_rbtree_node *
 rbtree_get(struct multimap_rbtree_node *root, int key)
 {
     struct multimap_rbtree_node *_root = root;
-    int direct                = 0;
+    int direct                         = 0;
     
     while (_root != NULL) {
         if (_root->key == key) {
@@ -121,6 +122,12 @@ rbtree_get(struct multimap_rbtree_node *root, int key)
         _root  = _root->childs[direct]; 
     }
     return NULL;
+}
+
+static inline void
+rbtree_node_init(struct multimap_rbtree_node *node)
+{
+    memset(node, 0, sizeof(struct multimap_rbtree_node));
 }
 
 static inline bool
@@ -204,6 +211,8 @@ multimap_add(struct multimap *map, int key, int val)
     if (node == NULL) {
         node = (struct multimap_rbtree_node*)malloc(
             sizeof(struct multimap_rbtree_node));
+        rbtree_node_init(node);
+ 
         if (node == NULL) {
             goto fail_2;
         }
@@ -215,7 +224,7 @@ multimap_add(struct multimap *map, int key, int val)
         
         rbtree_insert(map, node);
     }
-    
+
     // TODO: this is not clear and should be refactored
     long long idx = vec_add(&node->values, val, item);
     if (idx == -1) {
