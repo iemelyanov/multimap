@@ -41,6 +41,5 @@ struct multimap {
 void multimap_init(struct multimap *map);
 bool multimap_add(struct multimap *map, int key, int val);
 bool multimap_contains(struct multimap *map, int key);
-struct multimap_item multimap_next_item(struct multimap *map);
 
 #endif

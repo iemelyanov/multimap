@@ -51,11 +51,19 @@ test()
     multimap_add(&map, 1, 2);
     multimap_add(&map, 2, 1);
     multimap_add(&map, 3, 1);
+    multimap_add(&map, 2, 2);
 
     assert(multimap_contains(&map, 1));
     assert(multimap_contains(&map, 2));
     assert(multimap_contains(&map, 3));
     assert(!multimap_contains(&map, 4));
+
+    // Iterate over items
+    struct multimap_item *it = map.head;
+    for (; it != NULL; it = it->next) {
+        printf("key: %d val: %d\n", it->node->key,
+               it->node->values.items[it->val_idx].value);
+    }
     
     print_tree(map.root, 0);
 }

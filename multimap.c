@@ -246,7 +246,8 @@ fail:
     return false;
 }
 
-bool multimap_contains(struct multimap *map, int key)
+bool
+multimap_contains(struct multimap *map, int key)
 {
     assert(map);
 
